@@ -1,61 +1,54 @@
 #!/bin/bash
 
-# ——————————————————————————————————————————————————————————————————————————————————————
-# Colors for Terminal UI
-# ——————————————————————————————————————————————————————————————————————————————————————
-RED='\033[0;31m'
-GREEN='\033[0;32m'
+# --- Core Settings ---
+BRAND="MamadWhyt-UI"
+ADMIN_USER="admin"
+ADMIN_PASS="admin123"
+PANEL_PORT="2053"
+
+# --- Colors ---
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
-YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
 NC='\033[0m'
 
 clear
 echo -e "${BLUE}==================================================${NC}"
-echo -e "${CYAN}      Welcome to MAMADWHYT-UI Installation        ${NC}"
-echo -e "${CYAN}      Fully Customized & Premium Edition          ${NC}"
+echo -e "${CYAN}      DEPLOYING FULL $BRAND PANEL            ${NC}"
 echo -e "${BLUE}==================================================${NC}"
 
-# ۱. آپدیت مخازن و نصب پیش‌نیازها
-echo -e "${YELLOW}[1/4] Preparing System...${NC}"
-apt update && apt install curl socat sed git -y
+# ۱. نصب پیش‌نیازها و ساخت ساختار پوشه‌ها
+echo -e "${CYAN}[1/4] Preparing System...${NC}"
+apt update && apt install curl tar wget sed -y
+rm -rf /usr/local/x-ui
+mkdir -p /usr/local/x-ui/bin
+mkdir -p /usr/local/x-ui/web
 
-# ۲. نصب سورس اصلی پنل انگلیسی (Sanaei 3X-UI)
-echo -e "${YELLOW}[2/4] Fetching Core Files...${NC}"
-bash <(curl -Ls https://raw.githubusercontent.com/mhzard/v2ray-sanaei/master/install.sh)
+# ۲. دانلود هسته اصلی (Xray-core)
+echo -e "${CYAN}[2/4] Downloading Xray Core...${NC}"
+# ما همیشه آخرین نسخه را مستقیم دانلود می‌کنیم
+wget -N --no-check-certificate -O /usr/local/x-ui/bin/xray-linux-amd64.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-amd64.zip
+unzip /usr/local/x-ui/bin/xray-linux-amd64.zip -d /usr/local/x-ui/bin/
+rm /usr/local/x-ui/bin/xray-linux-amd64.zip -f
 
-# ۳. عملیات شخصی‌سازی عمیق (White-Labeling)
-echo -e "${YELLOW}[3/4] Customizing Branding & UI...${NC}"
+# ۳. دانلود و شخصی‌سازی فایل‌های وب (UI)
+echo -e "${CYAN}[3/4] Personalizing Web Interface...${NC}"
+# در این مرحله ما فایل‌های وب را از گیت‌هابت دانلود می‌کنیم
+# (فرض بر این است که تو این فایل‌ها را در فازهای بعدی در گیت‌هابت می‌سازی)
+wget -N --no-check-certificate -O /usr/local/x-ui/web/dist.tar.gz https://raw.githubusercontent.com/juliian321/mamadwhyt-ui/main/web/dist.tar.gz
+tar zxvf /usr/local/x-ui/web/dist.tar.gz -d /usr/local/x-ui/web/
+rm /usr/local/x-ui/web/dist.tar.gz -f
 
-# متغیر نام برند تو
-BRAND="MamadWhyt-UI"
+# ۴. شخصی‌سازی برند و تنظیمات ورود
+echo -e "${CYAN}[4/4] Finalizing Branding...${NC}"
+# این بخش تمام ردپاهای ثنایی را از فایل‌های دانلود شده پاک می‌کند
+find /usr/local/x-ui/web -type f -exec sed -i "s/3x-ui/$BRAND/g" {} +
+find /usr/local/x-ui/web -type f -exec sed -i "s/Sanaei/$BRAND/g" {} +
 
-# تغییر نام سرویس و فایل‌های اجرایی
-find /usr/local/x-ui/bin -type f -exec sed -i "s/3x-ui/$BRAND/g" {} +
-find /usr/local/x-ui/bin -type f -exec sed -i "s/3X-UI/$BRAND/g" {} +
-
-# تغییر لوگوی متنی در صفحه لاگین و هدر (سمت راست بالا)
-# ما تمام تگ‌های مربوط به لوگوی 3X-UI را با نام تو جایگزین می‌کنیم
-find /usr/local/x-ui/bin -type f -exec sed -i "s/3x-ui/$BRAND/g" {} +
-find /usr/local/x-ui/bin -type f -exec sed -i "s/Sanaei/$BRAND/g" {} +
-
-# تغییر عنوان تب مرورگر (Browser Title)
-sed -i "s/<title>.*<\/title>/<title>$BRAND | Login<\/title>/g" /usr/local/x-ui/bin/x-ui
-
-# ۴. تنظیمات فایروال و امنیت
-echo -e "${YELLOW}[4/4] Finalizing Security Settings...${NC}"
-ufw disable
-ufw allow 2053/tcp
-ufw allow 443/tcp
-ufw allow 80/tcp
-
-# ری‌استارت برای اعمال تغییرات ظاهری
-x-ui restart
+# تنظیم یوزر و پسورد
+# (نیاز به فایل باینری x-ui دارد که در فاز بعدی می‌سازیم)
+# ./x-ui setting -username $ADMIN_USER -password $ADMIN_PASS -port $PANEL_PORT
 
 echo -e "${GREEN}==================================================${NC}"
-echo -e "${CYAN}   $BRAND INSTALLED SUCCESSFULLY!               ${NC}"
-echo -e "${BLUE}   ----------------------------------------------${NC}"
-echo -e "${YELLOW}   Panel Port:   2053                           ${NC}"
-echo -e "${YELLOW}   Login URL:    http://$(curl -s ipv4.icanhazip.com):2053 ${NC}"
+echo -e "${GREEN}   $BRAND IS INSTALLED! (Web Files Only)$NC}"
 echo -e "${BLUE}==================================================${NC}"
-echo -e "${GREEN}   Everything is set. Log in and enjoy!          ${NC}"
