@@ -1,4 +1,4 @@
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/24fd87d3-3671-4063-bcba-4f0ed524d79f" /># MamadWhyt-UI
+# MamadWhyt-UI
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/juliian321/mamadwhyt-ui/main/web/assets/images/logo.png" alt="Logo" width="120" height="120">
